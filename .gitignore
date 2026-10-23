@@ -1,0 +1,13 @@
+# Local configuration and secrets should never be part of this public repository
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+__pycache__/
+.DS_Store

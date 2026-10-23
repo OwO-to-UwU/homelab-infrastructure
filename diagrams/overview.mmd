@@ -1,0 +1,9 @@
+flowchart TB
+    clients["LAN clients"] --> router["MikroTik hAP ax3<br/>RouterOS · WAN · policy routing"]
+    router -->|"Selected traffic"| gateway["Debian 12 gateway<br/>nftables · B4 · sing-box"]
+    router --- host
+    subgraph host["Arch Linux server · KVM/libvirt"]
+        vm["Debian 13 storage VM<br/>4 vCPU · 8 GiB"] --> apps["Docker Compose services"]
+        hba["LSI SAS2308 · VFIO"] --> disks["2 SSDs + 3 HDDs<br/>separate Btrfs filesystems"]
+        hba --> vm
+    end

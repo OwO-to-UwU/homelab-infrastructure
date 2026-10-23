@@ -1,0 +1,29 @@
+flowchart LR
+    clients["LAN clients"]
+    router["MikroTik hAP ax3<br/>RouterOS · NAT · policy routing"]
+    cgnat["ISP CGNAT uplink"]
+    l2tp["Provider L2TP uplink<br/>public IPv4"]
+    apps["storage VM<br/>Caddy / applications"]
+
+    subgraph proxy["Proxybox · Debian 12"]
+        transit["Dedicated transit NIC<br/>/30 link"]
+        rules["nftables / B4<br/>packet classification"]
+        sing["sing-box<br/>selected proxy traffic"]
+        direct["Direct egress<br/>source-address policy"]
+        wg["WireGuard server<br/>wg-home"]
+        lanif["LAN NIC<br/>management + egress IPs"]
+        transit --> rules
+        rules -->|selected proxy traffic| sing
+        rules -.->|direct traffic| direct
+        sing --> lanif
+        direct --> lanif
+    end
+
+    clients --> router
+    router -->|"policy route: via-proxybox"| transit
+    lanif -->|"returns via LAN"| router
+    router -->|"main default"| cgnat
+    router -->|"to-l2tp default"| l2tp
+    l2tp -.->|"UDP 51820 · WireGuard"| wg
+    l2tp -.->|"TCP 80/443"| apps
+    router ---|"LAN connectivity"| apps

@@ -1,0 +1,11 @@
+flowchart TB
+    VM["Debian 13 storage VM"] --> Compose["Docker Compose · independent projects"]
+    Compose --> Forgejo["Forgejo · SQLite"]
+    Compose --> Immich["Immich · PostgreSQL / ML / Valkey"]
+    Compose --> Services["Navidrome / Copyparty / ArchiveBox"]
+    SSD["SSD-B · application state"] --> Forgejo
+    SSD --> Immich
+    SSD --> Services
+    HDD["HDD-A · media and photos"] --> Immich
+    HDD --> Services
+    Forgejo -.->|"Btrfs backup, tested"| Backup["SSD-A · backup copy"]

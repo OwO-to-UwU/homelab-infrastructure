@@ -1,0 +1,27 @@
+# Sanitized transcription of the unit deployed on m900.
+# Addresses use TEST-NET-1 examples, not the live subnet.
+[Unit]
+Description=Wait for Proxybox LAN addresses
+Wants=network-online.target
+After=networking.service network-online.target
+Before=sing-box.service b4.service wg-quick@wg-home.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -ec '\
+  for i in $(seq 1 60); do \
+    ip -4 address show dev enp1s0f0 | grep -q "inet 192[.]0[.]2[.]99/24" && \
+    ip -4 address show dev enp1s0f0 | grep -q "inet 192[.]0[.]2[.]97/24" && \
+    ip -4 address show dev enp1s0f0 | grep -q "inet 192[.]0[.]2[.]98/24" && \
+    ip route show default | grep -q "default via 192[.]0[.]2[.]1 dev enp1s0f0" && \
+    exit 0; \
+    sleep 1; \
+  done; \
+  echo "Proxybox network addresses did not appear within 60 seconds" >&2; \
+  ip -br address show dev enp1s0f0 >&2; \
+  ip route >&2; \
+  exit 1'
+
+[Install]
+WantedBy=multi-user.target

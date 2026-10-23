@@ -1,0 +1,25 @@
+flowchart TB
+    lan["Home LAN"]
+
+    subgraph host["Physical host: Arch Linux · KVM/libvirt"]
+        osdisk["Host OS NVMe · Btrfs"]
+        vmstore["Kingston NVMe · ext4 · /srv/vmstore"]
+        legacy["4 TB HDD · Btrfs · /srv/backup-a<br/>Personal archives"]
+        bridge["Linux bridge br0"]
+        hba["LSI SAS2308 HBA<br/>PCI 05:00.0 · vfio-pci"]
+
+        subgraph guest["VM: storage · Debian 13 · 4 vCPU · 8 GiB"]
+            vda["vda · OS QCOW2"]
+            vdb["vdb · services QCOW2"]
+            gnet["virtio NIC"]
+            docker["Docker Compose applications"]
+            disks["2 × SSD + 3 × HDD<br/>Independent Btrfs filesystems"]
+        end
+    end
+
+    lan --- bridge
+    bridge --- gnet
+    vmstore -->|"backs"| vda
+    vmstore -->|"backs"| vdb
+    hba -->|"VFIO PCI passthrough"| disks
+    vdb --> docker

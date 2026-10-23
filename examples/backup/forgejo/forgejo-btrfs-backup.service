@@ -1,0 +1,11 @@
+[Unit]
+Description=Forgejo Btrfs incremental backup to SSD-A
+Requires=docker.service
+After=docker.service
+RequiresMountsFor=/srv/storage/ssd-a /srv/storage/ssd-b
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/forgejo-btrfs-backup
+TimeoutStartSec=20min
+UMask=0077

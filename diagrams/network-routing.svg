@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 590" role="img" aria-labelledby="network-title network-desc">
+<title id="network-title">Home network and transparent routing</title>
+<desc id="network-desc">LAN clients connect to the MikroTik router, which routes selected traffic to a Debian Proxybox gateway running nftables, B4 and sing-box. CGNAT and public IPv4 L2TP uplinks are connected to the router. A storage VM is also on the LAN; incoming WireGuard reaches the gateway over the public IPv4 uplink.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#627890"/></marker></defs>
+<rect width="1400" height="590" fill="#ffffff"/>
+<style>.title{font:600 20px 'DejaVu Sans',sans-serif;fill:#1d2b42}.node{font:600 18px 'DejaVu Sans',sans-serif;fill:#192b42}.sub{font:14px 'DejaVu Sans',sans-serif;fill:#53657b}.edge-label{font:13px 'DejaVu Sans',sans-serif;fill:#435a75}.cluster{font:600 16px 'DejaVu Sans',sans-serif;fill:#246752}</style>
+<text x="50" y="45" class="title" text-anchor="start">ROUTING OVERVIEW</text>
+<rect x="30" y="256" width="185" height="94" rx="12" fill="#fff" stroke="#b9c7da" stroke-width="2"/>
+<text x="122" y="294" class="node" text-anchor="middle">LAN clients</text>
+<text x="122" y="319" class="sub" text-anchor="middle">Internal network</text>
+<rect x="278" y="246" width="218" height="114" rx="12" fill="#eff6ff" stroke="#88b5e9" stroke-width="2"/>
+<text x="387" y="285" class="node" text-anchor="middle">MikroTik hAP ax3</text>
+<text x="387" y="309" class="sub" text-anchor="middle">RouterOS · NAT</text>
+<text x="387" y="333" class="sub" text-anchor="middle">Policy routing</text>
+<path d="M215 303 H276" fill="none" stroke="#627890" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="267" y="83" width="183" height="76" rx="12" fill="#f9fafb" stroke="#b9c7da" stroke-width="2"/>
+<text x="359" y="115" class="node" text-anchor="middle">ISP uplink</text>
+<text x="359" y="138" class="sub" text-anchor="middle">CGNAT</text>
+<rect x="490" y="83" width="214" height="76" rx="12" fill="#f9fafb" stroke="#b9c7da" stroke-width="2"/>
+<text x="597" y="115" class="node" text-anchor="middle">L2TP uplink</text>
+<text x="597" y="138" class="sub" text-anchor="middle">Public IPv4</text>
+<path d="M348 246 V162" fill="none" stroke="#627890" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M456 246 L565 160" fill="none" stroke="#627890" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="333" y="201" class="edge-label" text-anchor="middle">WAN</text>
+<text x="533" y="209" class="edge-label" text-anchor="middle">Public endpoint</text>
+<rect x="581" y="210" width="771" height="203" rx="18" fill="#f2faf6" stroke="#a7d8c1" stroke-width="2"/>
+<text x="613" y="242" class="cluster" text-anchor="start">PROXYBOX · DEBIAN 12</text>
+<rect x="604" y="267" width="186" height="89" rx="12" fill="#fff" stroke="#9bcfba" stroke-width="2"/>
+<text x="697" y="301" class="node" text-anchor="middle">Transit NIC</text>
+<text x="697" y="326" class="sub" text-anchor="middle">Dedicated /30 link</text>
+<rect x="829" y="267" width="204" height="89" rx="12" fill="#fff" stroke="#9bcfba" stroke-width="2"/>
+<text x="931" y="301" class="node" text-anchor="middle">nftables / B4</text>
+<text x="931" y="326" class="sub" text-anchor="middle">Traffic processing</text>
+<rect x="1072" y="267" width="247" height="89" rx="12" fill="#fff" stroke="#9bcfba" stroke-width="2"/>
+<text x="1195" y="301" class="node" text-anchor="middle">sing-box / direct</text>
+<text x="1195" y="326" class="sub" text-anchor="middle">Selected egress</text>
+<path d="M496 303 H604" fill="none" stroke="#627890" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="550" y="286" class="edge-label" text-anchor="middle">Selected traffic</text>
+<path d="M790 311 H829" fill="none" stroke="#627890" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M1033 311 H1072" fill="none" stroke="#627890" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="793" y="371" width="364" height="31" rx="8" fill="#e1f3eb" stroke="#a5d4be" stroke-width="2"/>
+<text x="975" y="391" class="sub" text-anchor="middle">WireGuard endpoint · incoming via L2TP</text>
+<rect x="607" y="482" width="297" height="82" rx="12" fill="#eff6ff" stroke="#88b5e9" stroke-width="2"/>
+<text x="755" y="514" class="node" text-anchor="middle">Debian storage VM</text>
+<text x="755" y="541" class="sub" text-anchor="middle">Caddy · Docker applications</text>
+<path d="M387 360 V522 H604" fill="none" stroke="#627890" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="462" y="510" class="edge-label" text-anchor="start">LAN connectivity</text>
+<text x="54" y="562" class="sub" text-anchor="start">Solid arrows: main connectivity or routing direction.</text>
+</svg>

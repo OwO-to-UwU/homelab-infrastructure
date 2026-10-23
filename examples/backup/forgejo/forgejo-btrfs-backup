@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+
+SOURCE=/srv/storage/ssd-b/forgejo
+SNAPSHOTS=/srv/storage/ssd-b/.backup-snapshots
+DEST=/srv/storage/ssd-a/backups/forgejo
+COMPOSE=/srv/services/forgejo
+NAME="forgejo-$(date -u +%Y%m%d-%H%M%S)"
+
+exec 9>/run/lock/forgejo-btrfs-backup.lock
+flock -n 9 || { echo 'ERROR: another backup is running' >&2; exit 1; }
+for mount in /srv/storage/ssd-a /srv/storage/ssd-b; do
+  findmnt -M "$mount" >/dev/null || { echo "ERROR: not mounted: $mount" >&2; exit 1; }
+done
+btrfs subvolume show "$SOURCE" >/dev/null
+test -f "$SOURCE/data/gitea.db"
+test -d "$COMPOSE"
+test "$(docker inspect -f '{{.State.Running}}' forgejo)" = true
+mkdir -p "$SNAPSHOTS" "$DEST"
+chmod 700 "$SNAPSHOTS" "$DEST"
+test ! -e "$SNAPSHOTS/$NAME"
+test ! -e "$DEST/$NAME"
+test ! -e "$DEST/config-${NAME#forgejo-}"
+
+# Choose the latest replicated snapshot, not merely the latest source snapshot.
+PREVIOUS="$(find "$DEST" -mindepth 1 -maxdepth 1 -type d -name 'forgejo-20??????-??????' -printf '%f\n' | LC_ALL=C sort | tail -n 1)"
+if [[ -n "$PREVIOUS" ]]; then
+  btrfs subvolume show "$SNAPSHOTS/$PREVIOUS" >/dev/null
+  btrfs subvolume show "$DEST/$PREVIOUS" >/dev/null
+  [[ "$(btrfs property get -ts "$SNAPSHOTS/$PREVIOUS" ro)" == 'ro=true' ]]
+  [[ "$(btrfs property get -ts "$DEST/$PREVIOUS" ro)" == 'ro=true' ]]
+fi
+
+RESTART=0
+on_exit() {
+  result=$?
+  if (( RESTART )); then
+    if [[ "$(docker inspect -f '{{.State.Running}}' forgejo 2>/dev/null || true)" != true ]]; then
+      docker start forgejo >&2 || result=1
+    fi
+  fi
+  exit "$result"
+}
+trap on_exit EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+RESTART=1
+docker stop -t 30 forgejo >/dev/null
+btrfs subvolume snapshot -r "$SOURCE" "$SNAPSHOTS/$NAME"
+docker start forgejo >/dev/null
+RESTART=0
+
+echo "Replicating $NAME (${PREVIOUS:-full})"
+if [[ -n "$PREVIOUS" ]]; then
+  btrfs send -p "$SNAPSHOTS/$PREVIOUS" "$SNAPSHOTS/$NAME" | btrfs receive "$DEST"
+else
+  btrfs send "$SNAPSHOTS/$NAME" | btrfs receive "$DEST"
+fi
+cp -a -- "$COMPOSE" "$DEST/config-${NAME#forgejo-}"
+diff -qr "$SNAPSHOTS/$NAME" "$DEST/$NAME"
+btrfs filesystem sync "$DEST"
+echo "BACKUP_OK: $DEST/$NAME"

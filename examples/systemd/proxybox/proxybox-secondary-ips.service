@@ -1,0 +1,17 @@
+# Sanitized transcription of the unit deployed on m900.
+# Addresses use TEST-NET-1 examples, not the live subnet.
+[Unit]
+Description=Configure Proxybox secondary IPv4 addresses
+Requires=sys-subsystem-net-devices-enp1s0f0.device
+After=sys-subsystem-net-devices-enp1s0f0.device networking.service
+Wants=networking.service
+Before=wg-quick@wg-home.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/ip address replace 192.0.2.97/24 dev enp1s0f0
+ExecStart=/usr/sbin/ip address replace 192.0.2.98/24 dev enp1s0f0
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
